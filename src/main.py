@@ -49,6 +49,9 @@ def sync_save(src_path, dst_path):
 def confirm_sync(src_path, dst_path):
     if messagebox.askyesno("确认同步", f"确定要从 {src_path} 同步到 {dst_path} 吗？"):
         sync_save(src_path, dst_path)
+    else:
+        messagebox.showinfo("同步取消", "同步操作已取消")
+
 
 # 选择游戏事件处理
 def on_game_select(event):
