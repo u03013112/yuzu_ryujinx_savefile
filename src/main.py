@@ -66,15 +66,19 @@ class AutoSyncHandler(FileSystemEventHandler):
             if event.src_path.startswith(src_path):
                 sync_save(src_path, dst_path)
 
+# 获取文件夹最后修改时间
+def get_last_modified_time(dir_path):
+    return max(os.path.getmtime(os.path.join(dir_path, file)) for file in os.listdir(dir_path))
+
 # 开启自动同步
 def start_auto_sync():
-    sync_paths = [(game["yuzu_save_path"], game["ryujinx_save_path"]) for game in games]
-    event_handler = AutoSyncHandler(sync_paths)
-    observer = Observer()
-    for path in [path for game in games for path in (game["yuzu_save_path"], game["ryujinx_save_path"])]:
-        observer.schedule(event_handler, path, recursive=True)
-    observer.start()
-    messagebox.showinfo("自动同步已启动", "自动同步已启动，监控存档文件夹中的变化。")
+    for game in games:
+        yuzu_time = get_last_modified_time(game["yuzu_save_path"])
+        ryujinx_time = get_last_modified_time(game["ryujinx_save_path"])
+        if yuzu_time > ryujinx_time:
+            sync_save(game["yuzu_save_path"], game["ryujinx_save_path"])
+        elif ryujinx_time > yuzu_time:
+            sync_save(game["ryujinx_save_path"], game["yuzu_save_path"])
 
 # 创建界面
 root = Tk()
